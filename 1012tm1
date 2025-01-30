@@ -1,0 +1,142 @@
+#include <Servo.h>
+ #include "Adafruit_VEML7700.h"
+ #include "HX711.h"
+
+
+// Include two servo motors
+ Servo servo1;
+ Servo servo2;
+
+
+// Pin numbers for the servos
+ const int servoPin1 = 5;
+ const int servoPin2 = 6;
+
+
+// Variables to store the servo positions
+ int servoPos1 = 0;
+ int servoPos2 = 0;
+
+
+// Pin number for the button
+ const int buttonPin = 7;
+// Variable to read the button state
+ int buttonRead;
+// Variable to track if the button has been activated
+ int buttonOn = 0;
+
+
+ // Pin number for the emergency button
+ const int EbuttonPin = 4;
+// Variable to read the emergency button state
+ int EbuttonRead;
+// Variable to track if the emergency button has been activated
+ int EbuttonOn = 0;
+
+
+// Light threshold for triggering the motors
+ const int lightThreshold = 10;
+// Variable to store the light sensor reading
+ float lux;
+
+
+// Create an object for the VEML7700 light sensor
+ Adafruit_VEML7700 veml = Adafruit_VEML7700();
+
+
+const int LOADCELL_DOUT_PIN = 2;          //the number of the weight sensor pin
+const int LOADCELL_SCK_PIN = 3; 
+int ledPin = 9;
+HX711 scale;
+
+
+
+
+void setup() {
+ Serial.begin(57600);
+ scale.begin(LOADCELL_DOUT_PIN, LOADCELL_SCK_PIN);
+ // Attach the servos to their pins and set to position 0
+   servo1.attach(servoPin1);
+   servo2.attach(servoPin2);
+   servo1.write(servoPos1);
+   servo2.write(servoPos2);
+
+
+pinMode(ledPin, OUTPUT);
+ // set up the button 
+   pinMode(buttonPin, INPUT_PULLUP);
+
+
+// set up the emergency button 
+   pinMode(EbuttonPin, INPUT_PULLUP);
+
+
+// set up light sensor and check for success
+ if (!veml.begin()) {
+   Serial.println("VEML7700 sensor failed");
+   while (1); // Stop everything if sensor check fails
+ }
+ // set up light sensor's gain and integration time
+    veml.setGain(VEML7700_GAIN_1_8);
+    veml.setIntegrationTime(VEML7700_IT_400MS);
+}
+
+
+void loop() {
+// Read the light level
+      lux = veml.readLux();
+         
+// Read the state of the button
+      buttonRead = digitalRead(buttonPin);
+
+
+// Tracks if the button is pressed
+ if(buttonRead == LOW){
+   buttonOn += 1;
+   }
+
+
+// Read the state of the emergency button
+      EbuttonRead = digitalRead(EbuttonPin);      
+
+
+// Tracks if the emergency button is pressed
+ if(EbuttonRead == LOW){
+   EbuttonOn += 1;
+ }
+// If  button pressed, moves the motors 180 degrees locking in the phone
+ if(buttonOn >= 1){
+   servoPos1 = 180;
+   servoPos2 = 180;
+   servo1.write(servoPos1);
+   servo2.write(servoPos2);
+ 
+// If the light level exceeds threshold, reset motors and reset the button tracker
+   if(lux > lightThreshold){
+      delay(1000);
+      servoPos1 = 0;
+      servoPos2 = 0;
+      servo1.write(servoPos1);
+      servo2.write(servoPos2);
+      buttonOn = 0;  
+   }
+ }
+ if(EbuttonOn >= 1){
+      servoPos1 = 0;
+      servoPos2 = 0;
+      servo1.write(servoPos1);
+      servo2.write(servoPos2);
+      buttonOn = 0;
+      EbuttonOn = 0;  
+}
+
+
+if (scale.read() > 1.9) {                            // If weight is below 19 mg
+  digitalWrite(ledPin, HIGH);               // Turn LED on
+} else {                                   
+  digitalWrite(ledPin, LOW);                // Turn LED off
+}
+
+
+  delay(100);
+ }
