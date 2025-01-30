@@ -1,0 +1,139 @@
+// Define pins for the LEDs
+const int redLED = 12;
+const int greenLED = 11;
+const int yellowLED = 10;
+
+// Define pins for the buttons linked to LEDs
+const int redbutton = A3;
+const int greenbutton = A5;
+const int yellowbutton = A4;
+
+// Define pins for the speed selection buttons
+const int speed1button = A7;
+const int speed2button = A6;
+const int speed3button = A2;
+int score = 0;
+int ledArray[3] = {redLED, greenLED, yellowLED};
+int buttonArray[3] = {redbutton, greenbutton, yellowbutton};
+int interval = 2000; // Unused but could be for setting flash delay
+
+byte displayLEDs [10][7] = {
+  { 0,0,0,0,0,0,1 },
+  { 0,1,0,1,1,1,1 },
+  { 0,0,1,0,0,1,0 },
+  { 0,0,0,0,1,1,0 },
+  { 0,1,0,1,1,0,0 },
+  { 1,0,0,0,1,0,0 },
+  { 1,0,0,0,0,0,0 },
+  { 0,0,0,1,1,1,1 },
+  { 0,0,0,0,0,0,0 },
+  { 0,0,0,0,1,0,0 } 
+};
+
+byte segmentPins[] = {6, 5, 2, 3, 4, 7, 8};
+
+void setup() {
+  Serial.begin(9600);
+
+  // Initialize all LED pins as outputs
+  pinMode(redLED, OUTPUT);
+  pinMode(greenLED, OUTPUT);
+  pinMode(yellowLED, OUTPUT);
+
+  // Initialize all button pins as inputs with internal pull-up resistors
+  pinMode(redbutton, INPUT_PULLUP);
+  pinMode(greenbutton, INPUT_PULLUP);
+  pinMode(yellowbutton, INPUT_PULLUP);
+  pinMode(speed1button, INPUT_PULLUP);
+  pinMode(speed2button, INPUT_PULLUP);
+  pinMode(speed3button, INPUT_PULLUP);
+
+  
+  pinMode(segmentPins[0], OUTPUT);
+  pinMode(segmentPins[1], OUTPUT);
+  pinMode(segmentPins[2], OUTPUT);
+  pinMode(segmentPins[3], OUTPUT);
+  pinMode(segmentPins[4], OUTPUT);
+  pinMode(segmentPins[5], OUTPUT);
+  pinMode(segmentPins[6], OUTPUT);
+
+  // Initialize the seven-segment display
+  //byte numDigits = 1;
+  //byte digitPins[] = {}; // No digit pins needed for 1 digit display
+  //byte segmentPins[] = {6, 5, 2, 3, 4, 7, 8, 9};
+  //bool resistorsOnSegments = true;
+  //byte hardwareConfig = COMMON_CATHODE; 
+  //sevseg.begin(hardwareConfig, numDigits, digitPins, segmentPins, resistorsOnSegments);
+  //sevseg.setBrightness(100);
+  displayNumber(score);
+}
+
+void displayNumber(int i) {
+  digitalWrite(segmentPins[0], displayLEDs[i][0] ? HIGH : LOW);
+  digitalWrite(segmentPins[1], displayLEDs[i][1] ? HIGH : LOW);
+  digitalWrite(segmentPins[2], displayLEDs[i][2] ? HIGH : LOW);
+  digitalWrite(segmentPins[3], displayLEDs[i][3] ? HIGH : LOW);
+  digitalWrite(segmentPins[4], displayLEDs[i][4] ? HIGH : LOW);
+  digitalWrite(segmentPins[5], displayLEDs[i][5] ? HIGH : LOW);
+  digitalWrite(segmentPins[6], displayLEDs[i][6] ? HIGH : LOW);
+}
+
+
+void loop() {
+  // Corrected the conditional and looping logic
+  int selectedLED;
+
+  if ( analogRead(speed1button) >= 900) {
+   
+
+ 
+    for (int k = 0; k < 9; k++) { // Perform 10 flashes
+      delay(2000);
+      selectedLED = random(0, 3);
+      digitalWrite(ledArray[selectedLED], HIGH);
+      delay(300); // Light up for a very brief period
+      digitalWrite(ledArray[selectedLED], LOW);
+   if (analogRead(buttonArray[selectedLED]) >= 900) {
+        score = score + 1;
+        displayNumber(score);
+      }
+    
+    }
+
+  } else if (analogRead (speed2button) >= 900) {
+    
+     
+ 
+     for (int k = 0; k < 9; k++) { // Perform 10 flashes
+      delay(2000);
+      selectedLED = random(0, 3);
+      digitalWrite(ledArray[selectedLED], HIGH);
+      delay(500);
+      digitalWrite(ledArray[selectedLED], LOW);
+      if (analogRead(buttonArray[selectedLED]) >= 900) {
+        score = score + 1;
+        displayNumber(score);
+      }
+    
+    }
+  } else if (analogRead(speed3button) >= 900) {
+    
+
+
+     for (int k = 0; k < 9; k++) { // Perform 10 flashes
+      delay(2000);
+      selectedLED = random(0, 3);
+      digitalWrite(ledArray[selectedLED], HIGH);
+      delay(700);
+      digitalWrite(ledArray[selectedLED], LOW);
+      if (analogRead(buttonArray[selectedLED]) >= 900) {
+        score = score + 1;
+        displayNumber(score);
+      }
+     }
+  }
+}
+
+
+    
+  
